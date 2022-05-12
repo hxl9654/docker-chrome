@@ -1,0 +1,60 @@
+#!/bin/sh
+
+#
+# This small wrapper is used to gracefully terminate Chromium.  It prevents
+# the application to receive termination signals directly.  Instead, the wrapper
+# traps signals and send CTRL+q key presses to Chromium.
+#
+
+FF_PID=0
+
+# Gracefully terminate Chromium.  This function is called when this script
+# receives a termination signal (SIGKILL, SIGINT or SIGQUIT).
+kill_chromium() {
+    # Gracefully close Chromium.
+    echo "Terminating Chromium..."
+    xdotool key "Escape"
+    xdotool key "ctrl+q"
+
+    # And wait for its termination.
+    if [ "$FF_PID" -ne 0 ]; then
+        wait $FF_PID
+        exit $?
+    fi
+}
+trap 'kill_chromium' TERM INT QUIT
+
+# This function is called when this script exits.  It makes sure that Chromium is
+# fully closed by waiting for all its processes to terminate.
+exit_wrapper() {
+    echo "Waiting for Chromium to completely terminate..."
+    TIMEOUT=10
+    while chromium_running && [ "$TIMEOUT" -gt 0 ]; do
+        TIMEOUT="$(expr "$TIMEOUT" - 1)"
+        sleep 1
+    done
+
+    if [ "$TIMEOUT" -gt 0 ]; then
+        echo "Chromium terminated."
+    else
+        echo "WARNING: Chromium still not terminated."
+    fi
+}
+trap 'exit_wrapper' EXIT
+
+chromium_running() {
+    ps | grep -v grep | grep -q '/usr/lib/chromium'
+}
+
+# Make sure to terminate any existing instance.
+if chromium_running; then
+    kill_chromium
+fi
+
+# Start Chromium in background.
+/usr/bin/chromium "$@" &
+
+# And wait for its termination.
+FF_PID=$!
+wait $FF_PID
+exit $?
