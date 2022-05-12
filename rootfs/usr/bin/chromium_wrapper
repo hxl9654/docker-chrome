@@ -43,7 +43,7 @@ exit_wrapper() {
 trap 'exit_wrapper' EXIT
 
 chromium_running() {
-    ps | grep -v grep | grep -q '/usr/lib/chromium'
+    ps | grep -v grep | grep -q '/usr/lib/chromium-browser'
 }
 
 # Make sure to terminate any existing instance.
@@ -52,7 +52,7 @@ if chromium_running; then
 fi
 
 # Start Chromium in background.
-/usr/bin/chromium "$@" &
+/usr/bin/chromium-browser "$@" &
 
 # And wait for its termination.
 FF_PID=$!
