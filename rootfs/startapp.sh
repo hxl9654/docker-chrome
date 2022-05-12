@@ -5,4 +5,4 @@ set -u # Treat unset variables as an error.
 
 export HOME=/config
 mkdir -p /config/profile
-exec /usr/bin/chromium_wrapper --no-sandbox --disable-dev-shm-usage --user-data-dir=/config/profile
+exec /usr/bin/chromium_wrapper --disable-dev-shm-usage --user-data-dir=/config/profile
