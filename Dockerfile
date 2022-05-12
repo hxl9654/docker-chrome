@@ -1,11 +1,3 @@
-# Build the membarrier check tool.
-FROM alpine:3.12
-WORKDIR /tmp
-COPY membarrier_check.c .
-RUN apk --no-cache add build-base linux-headers
-RUN gcc -static -o membarrier_check membarrier_check.c
-RUN strip membarrier_check
-
 # Pull base image.
 FROM jlesage/baseimage-gui:alpine-3.15-v3.5.8
 
@@ -45,7 +37,6 @@ RUN \
 
 # Add files.
 COPY rootfs/ /
-COPY --from=0 /tmp/membarrier_check /usr/bin/
 
 # Set environment variables.
 ENV APP_NAME="Chromium"
